@@ -4,7 +4,7 @@ const getInput = function() {
   return input;
 };
 
-const findLabels = function(input, labels) {
+const findLabels = function(input) {
   return input.reduce(function(labels, element, index){
 
     if(element.includes(':')) {
@@ -139,9 +139,8 @@ const executeCode = function(memory) {
 
 const run = function() {
   const memory = {};
-  const labels = {};
   const input = getInput();
-  findLabels(input, labels);
+  const labels = findLabels(input);
   loadMemory(memory, labels, input);
   executeCode(memory);
 };
