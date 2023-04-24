@@ -1,6 +1,5 @@
 const getInput = function() {
   const input = process.argv[2].split(' ');
-  input.unshift('zeroIndex');
   return input;
 };
 
@@ -9,7 +8,7 @@ const findLabels = function(input) {
 
     if(element.includes(':')) {
       const entry = element.split(':');
-      labels[entry[0]] = index;
+      labels[entry[0]] = index + 1;
       input[index] = entry[1];
     } 
 
@@ -18,16 +17,16 @@ const findLabels = function(input) {
 };
 
 const loadMemory = function(memory, labels, input) {
-  for(let i = 1; i < input.length - 1; i++) {
-    const number = toNumber(input[i]);
+  for(let cell = 0; cell < input.length; cell++) {
+    const number = toNumber(input[cell]);
 
     if(isNaN(number)) {
-      if(labels[input[i]] === undefined) {
-        throwError(input[i]);
+      if(labels[input[cell]] === undefined) {
+        throwError(input[cell]);
       }
-      input[i] = labels[input[i]];
+      input[cell] = labels[input[cell]];
     }
-    memory[i] = toNumber(input[i]);
+    memory[cell + 1] = toNumber(input[cell]);
   }
 };
 
