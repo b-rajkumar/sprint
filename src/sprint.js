@@ -1,100 +1,118 @@
-const memory = {};
-const labels = {};
-
-const loadMemory = function() {
+const getInput = function() {
   const input = process.argv[2].split(' ');
-  input.unshift(-1);
+  input.unshift('zeroIndex');
+  return input;
+};
 
+const findLabels = function(input, labels) {
+  return input.reduce(function(labels, element, index){
+
+    if(element.includes(':')) {
+      const entry = element.split(':');
+      labels[entry[0]] = index;
+      input[index] = entry[1];
+    } 
+
+    return labels;
+  }, {});
+};
+
+const loadMemory = function(memory, labels, input) {
   for(let i = 1; i < input.length - 1; i++) {
+    const number = toNumber(input[i]);
 
-    if(input[i].includes(':')) {
-      const entry = input[i].split(':');
-      labels[entry[0]] = i;
-      input[i] = entry[1];
-    }
-
-    const number = +input[i];
-
-    if(number + '' === 'NaN') {
+    if(isNaN(number)) {
       if(labels[input[i]] === undefined) {
-        console.error(input[i], 'is not defined!');
-        process.exit(1);
+        throwError(input[i]);
       }
       input[i] = labels[input[i]];
     }
-
-    memory[i] = +input[i];
-  };
-};
-
-const findLabels = function(input) {
-
-};
-
-const getValue = function(index) {
-  if(memory[index] === undefined) {
-    console.error(index, 'is not defined!');
-    process.exit(1);
+    memory[i] = toNumber(input[i]);
   }
+};
 
+const toNumber = function(stringNum) {
+  return +stringNum;
+};
+
+const throwError = function(index) {
+  console.error(index, 'is not defined!');
+  process.exit(1);
+};
+
+const getValue = function(memory, index) {
+  if(memory[index] === undefined) {
+    throwError(index);
+  }
   return memory[index];
 };
 
-const put = function(value, index) {
+const put = function(value, memory, index) {
   memory[index] = value;
 };
 
 const assign = function(memory, index) {
-  const value = getValue(index + 1); 
-  const memLocation = getValue(index + 2); 
-  put(value, memLocation);
+  const value = getValue(memory, index + 1); 
+  const memLocation = getValue(memory, index + 2); 
+  put(value, memory, memLocation);
 
   return index + 3;
 };
 
 const copy = function(memory, index) {
-  const value = getValue(getValue(index+1)) ;
-  put(value, getValue(index + 2));
+  const value = getValue(memory, getValue(memory, index + 1)) ;
+  put(value, memory, getValue(memory, index + 2));
 
   return index + 3;
 };
 
 const add = function(memory, index) {
-  const firstValue = getValue(getValue(index+1)) ;
-  const secondValue = getValue(getValue(index+2)) ;
-  const memLocation = getValue(index + 3);
-  put(firstValue + secondValue, memLocation); 
+  const firstValue = getValue(memory, getValue(memory, index + 1)) ;
+  const secondValue = getValue(memory, getValue(memory, index + 2)) ;
+  const memLocation = getValue(memory, index + 3);
+  put(firstValue + secondValue, memory, memLocation); 
 
   return index + 4;
 };
 
 const sub = function(memory, index) {
-  const firstValue = getValue(getValue(index+1)) ;
-  const secondValue = getValue(getValue(index+2)) ;
-  const memLocation = getValue(index + 3);
-  put(firstValue - secondValue, memLocation); 
+  const firstValue = getValue(memory, getValue(memory, index + 1)) ;
+  const secondValue = getValue(memory, getValue(memory, index + 2)) ;
+  const memLocation = getValue(memory, index + 3);
+  put(firstValue - secondValue, memory, memLocation); 
 
   return index + 4;
 };
 
 const jump = function(memory, index) {
-  return getValue(index + 1);
+  return getValue(memory, index + 1);
 };
 
 const jumpIfLesser = function(memory, index) {
-  const firstValue = getValue(getValue(index+1)) ;
-  const secondValue = getValue(getValue(index+2)) ;
+  const firstValue = getValue(memory, getValue(memory, index + 1)) ;
+  const secondValue = getValue(memory, getValue(memory, index + 2)) ;
 
   if(firstValue < secondValue) {
-    return getValue(index + 3);
+    return getValue(memory, index + 3);
   }
 
   return index + 4;
 };
 
-const halt = function() {
+const jumpIfEqual = function(memory, index) {
+  const firstValue = getValue(memory, getValue(memory, index + 1)) ;
+  const secondValue = getValue(memory, getValue(memory, index + 2)) ;
+
+  if(firstValue === secondValue) {
+    return getValue(memory, index + 3);
+  }
+
+  return index + 4;
+};
+
+const halt = function(memory) {
   console.log(memory);
-  process.exit();
+  process.exit(0);
 };
 
 const operations = {
@@ -102,21 +120,30 @@ const operations = {
   '1': add, 
   '2': sub, 
   '3': jump, 
+  '4': jumpIfEqual, 
   '5': jumpIfLesser, 
   '7': copy, 
   '9': halt
 };
 
-const runCode = function() {
+const executeCode = function(memory) {
   let index = 1;
   while(index < Object.keys(memory).length) {
     const operation = operations[memory[index]];
     if(operation === undefined) {
-      halt();
+      throwError(index);
     }
     index = operation(memory, index);
   }
 };
 
-loadMemory();
-runCode();
+const run = function() {
+  const memory = {};
+  const labels = {};
+  const input = getInput();
+  findLabels(input, labels);
+  loadMemory(memory, labels, input);
+  executeCode(memory);
+};
+
+run();
