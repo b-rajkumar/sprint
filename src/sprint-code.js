@@ -1,4 +1,5 @@
-3 CODESTART
+const sprintCode = 
+`3 CODESTART
 X1:0 Y1:0 X2:3 Y2:4
 DIFF_X:0 DIFF_Y:0
 SUM:0
@@ -53,6 +54,7 @@ COMP:7 COUNTER DISTANCE
 2 DISTANCE ONE DISTANCE
 
 ASSIGN_RES:7 DISTANCE 185
-
-
 9
+`;
+
+exports.sprintCode = sprintCode;

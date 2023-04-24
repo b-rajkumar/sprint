@@ -1,6 +1,9 @@
+const code = require('./sprint-code.js');
 const getInput = function() {
-  const input = process.argv[2].split(' ');
-  return input;
+  input = code.sprintCode.replaceAll('\n', ' ');
+  input = input.replace(/  */g, ' ');
+  input = input.replace(/: */g, ':');
+  return input.split(' ');
 };
 
 const findLabels = function(input) {
